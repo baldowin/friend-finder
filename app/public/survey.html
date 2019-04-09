@@ -1,0 +1,109 @@
+<!DOCTYPE <!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+</head>
+<body>
+    <h1 class="title">Personality Survey!</h1>
+    <div class="jumbotron">
+        <div class="modal-content" id="modal" style="display:none">
+            <div class="modal-header">
+                <h4 class="modal-title">Your New Friend</h4>
+            </div> 
+            <div class="friend">
+                <h1><span id="name">loading</span></h1>
+                <img id="photo">
+            </div>
+        </div>
+        <h1 class="question"></h1>
+        <div class="answers"><h3 class="ans">Click to Start!</h3></div>
+        <form role="form" class="info" style="display:none">
+            <div class="form-group">
+              <label for="reserve-name">Name</label>
+              <input type="text" class="form-control" id="reserve-name">
+            </div>
+            <div class="form-group">
+              <label for="reserve-photo">Link to Picture</label>
+              <input type="text" class="form-control" id="reserve-photo">
+            </div>
+            <button type="submit" class="btn btn-primary submit">Submit</button>
+          </form>
+          
+    </div>
+     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript">
+        var index = 0;
+        var questions=
+        ["I like watching sports",
+        "I like playing sports",
+        "I like spending time outside",
+        "I like reading books",
+        "I like playing board games",
+        "I like playing video games",
+        "I like going out drinking",
+        "I like watching movies",
+        "I like figuring out puzzles",
+        "I like going shopping"]
+        var score=[];
+        var answers=["Strongly Agree","Agree","Neither Agree nor Disagree","Disagree","Strongly Disagree"]
+        function next(){
+            
+            var newQuestion = questions[index];
+            $(".answers").empty();
+            $(".question").text(newQuestion);
+            for (var i=0;i<answers.length;i++){
+                var ansLine = $("<h3>");
+                ansLine.text(answers[i]);
+                ansLine.addClass("ans");
+                ansLine.attr("value",i+1);
+                ansLine.attr("correct",newQuestion.answer)
+                $(".answers").append(ansLine);
+            }
+        }
+        $(".answers").on("click",".ans",function(){
+            if (index!=0){
+                if(index<questions.length){
+                    score.push($(this).attr("value"));
+                    next();
+                }
+                else{
+                    $(".answers").text("Please fill out the following form finish signing up and find a friends");
+                    $(".question").text("Thank you For taking this survey");
+                    $(".info").show();
+                }
+            }
+            else{
+                next();
+            }
+            index++;
+        })
+        $(".submit").on("click", function(event) {
+            event.preventDefault();
+
+            // Here we grab the form elements
+            var newFriend = {
+            "name": $("#reserve-name").val().trim(),
+            "photo": $("#reserve-photo").val().trim(),
+            "scores": score
+            };
+
+
+            $.post("/api/friends", newFriend,
+            function(data) {
+                $("#name").text(data.name);
+                $("#photo").attr("src",data.photo);
+                $("#reserve-name").val("");
+                $("#reserve-photo").val("");
+                $(".info").hide();
+                $("#modal").show();
+            });
+
+        });
+    </script>
+</body>
+</html>
